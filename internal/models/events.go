@@ -21,7 +21,7 @@ type EventModel struct {
 	DB *sql.DB
 }
 
-func (m *EventModel) All(page, pageSize int, eventType string, centralID int) ([]*Event, error) {
+func (m *EventModel) All(page, pageSize int, eventType string, centralID int, instID string, device string) ([]*Event, error) {
 	offset := (page - 1) * pageSize
 
 	query := `
@@ -29,11 +29,15 @@ func (m *EventModel) All(page, pageSize int, eventType string, centralID int) ([
 		FROM event 
 		WHERE (? = '' OR event_type LIKE ?)
 		AND (? = 0 OR central = ?)
-		ORDER BY ts_unix_ms DESC 
+		AND (? = '' OR inst_id LIKE ?)
+		AND (? = '' OR device LIKE ?)
+		ORDER BY inst_id ASC, ts_unix_ms DESC 
 		LIMIT ? OFFSET ?`
 
 	searchPattern := "%" + eventType + "%"
-	rows, err := m.DB.Query(query, eventType, searchPattern, centralID, centralID, pageSize, offset)
+	instPattern := "%" + instID + "%"
+	devicePattern := "%" + device + "%"
+	rows, err := m.DB.Query(query, eventType, searchPattern, centralID, centralID, instID, instPattern, device, devicePattern, pageSize, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -51,14 +55,18 @@ func (m *EventModel) All(page, pageSize int, eventType string, centralID int) ([
 	return events, nil
 }
 
-func (m *EventModel) Count(eventType string, centralID int) (int, error) {
+func (m *EventModel) Count(eventType string, centralID int, instID string, device string) (int, error) {
 	var count int
 	query := `
 		SELECT COUNT(*) FROM event 
 		WHERE (? = '' OR event_type LIKE ?)
-		AND (? = 0 OR central = ?)`
+		AND (? = 0 OR central = ?)
+		AND (? = '' OR inst_id LIKE ?)
+		AND (? = '' OR device LIKE ?)`
 
 	searchPattern := "%" + eventType + "%"
-	err := m.DB.QueryRow(query, eventType, searchPattern, centralID, centralID).Scan(&count)
+	instPattern := "%" + instID + "%"
+	devicePattern := "%" + device + "%"
+	err := m.DB.QueryRow(query, eventType, searchPattern, centralID, centralID, instID, instPattern, device, devicePattern).Scan(&count)
 	return count, err
 }

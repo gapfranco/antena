@@ -27,6 +27,8 @@ type templateData struct {
 	Centrals        []interface{} // Simplified for now
 	SearchType      string
 	SearchCentral   int
+	SearchInstID    string
+	SearchDevice    string
 	CurrentPage     int
 	TotalPages      int
 	HasNextPage     bool
@@ -121,14 +123,16 @@ func (app *application) eventList(w http.ResponseWriter, r *http.Request) {
 	pageSize := 12
 	eventType := r.URL.Query().Get("event_type")
 	centralID, _ := strconv.Atoi(r.URL.Query().Get("central_id"))
+	instID := r.URL.Query().Get("inst_id")
+	device := r.URL.Query().Get("device")
 
-	events, err := app.events.All(page, pageSize, eventType, centralID)
+	events, err := app.events.All(page, pageSize, eventType, centralID, instID, device)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	totalEvents, err := app.events.Count(eventType, centralID)
+	totalEvents, err := app.events.Count(eventType, centralID, instID, device)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -140,6 +144,8 @@ func (app *application) eventList(w http.ResponseWriter, r *http.Request) {
 		Events:          events,
 		SearchType:      eventType,
 		SearchCentral:   centralID,
+		SearchInstID:    instID,
+		SearchDevice:    device,
 		CurrentPage:     page,
 		TotalPages:      (totalEvents + pageSize - 1) / pageSize,
 	}

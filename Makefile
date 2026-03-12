@@ -27,6 +27,25 @@ build: tailwind-build
 	@mkdir -p $(OUT_DIR)
 	go build -o $(OUT_DIR)/$(BINARY_NAME) $(SRC_PATH)
 
+## Compilação para Windows (amd64)
+# Adicionamos tailwind-build como dependência
+windows: tailwind-build
+	@echo "Construindo para Windows..."
+	@mkdir -p $(OUT_DIR)
+	GOOS=windows GOARCH=amd64 go build -o $(OUT_DIR)/$(BINARY_NAME).exe $(SRC_PATH)
+
+## Compilação para Linux (amd64)
+linux: tailwind-build
+	@echo "Construindo para Linux..."
+	@mkdir -p $(OUT_DIR)
+	GOOS=linux GOARCH=amd64 go build -o $(OUT_DIR)/$(BINARY_NAME)_linux $(SRC_PATH)
+
+## Compilação para macOS (Darwin amd64/arm64)
+darwin: tailwind-build
+	@echo "Construindo para macOS..."
+	@mkdir -p $(OUT_DIR)
+	GOOS=darwin GOARCH=amd64 go build -o $(OUT_DIR)/$(BINARY_NAME)_mac $(SRC_PATH)
+
 ## Limpa a pasta de builds e o CSS gerado
 clean:
 	@echo "Limpando arquivos..."
