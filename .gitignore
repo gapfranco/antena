@@ -1,0 +1,31 @@
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+out/
+dist/
+data/
+ui/static/css/styles.css
+
+# Testes e Cobertura
+*.test
+*.out
+coverage.txt
+profile.out
+
+# IDEs e Editores
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Variáveis de Ambiente
+.env
+antena.conf
+
+# Dependências
+vendor/
