@@ -1,0 +1,55 @@
+{{define "title"}}Exportar Eventos{{end}}
+
+{{define "main"}}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Exportar Eventos</h1>
+        <p class="text-sm text-gray-500">Gere uma planilha com o histórico de eventos</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <form action="/export" method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Instalação -->
+                <div>
+                    <label for="inst_id" class="block text-sm font-medium text-gray-700 mb-1">Código da Instalação</label>
+                    <input type="text" name="inst_id" id="inst_id" 
+                           placeholder="Deixe em branco para todas"
+                           class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                </div>
+
+                <!-- Datas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Data Inicial</label>
+                        <input type="date" name="start_date" id="start_date" 
+                               class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                    </div>
+                    <div>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Data Final</label>
+                        <input type="date" name="end_date" id="end_date" 
+                               class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                    </div>
+                </div>
+
+                <!-- Nome do Arquivo -->
+                <div>
+                    <label for="filename" class="block text-sm font-medium text-gray-700 mb-1">Nome da Planilha</label>
+                    <input type="text" name="filename" id="filename" placeholder="antena.xls"
+                           class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300">
+                    <p class="mt-1 text-xs text-gray-400">O arquivo será exportado no formato compatível com Excel (.xls)</p>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex justify-end">
+                <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Exportar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

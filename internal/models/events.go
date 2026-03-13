@@ -70,3 +70,48 @@ func (m *EventModel) Count(eventType string, centralID int, instID string, devic
 	err := m.DB.QueryRow(query, eventType, searchPattern, centralID, centralID, instID, instPattern, device, devicePattern).Scan(&count)
 	return count, err
 }
+
+func (m *EventModel) GetForExport(instID string, startMs, endMs int64) ([]*Event, error) {
+	var query string
+	var args []interface{}
+
+	if instID == "" {
+		query = `
+			SELECT id, central, link, device_id, event_type, local, device, device_type, ts_unix_ms, inst_id 
+			FROM event 
+			WHERE ts_unix_ms >= ? AND ts_unix_ms <= ?
+			ORDER BY ts_unix_ms ASC`
+		args = []interface{}{startMs, endMs}
+	} else {
+		query = `
+			SELECT id, central, link, device_id, event_type, local, device, device_type, ts_unix_ms, inst_id 
+			FROM event 
+			WHERE inst_id = ? 
+			AND ts_unix_ms >= ? 
+			AND ts_unix_ms <= ?
+			ORDER BY ts_unix_ms ASC`
+		args = []interface{}{instID, startMs, endMs}
+	}
+
+	rows, err := m.DB.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var events []*Event
+	for rows.Next() {
+		e := &Event{}
+		err := rows.Scan(&e.ID, &e.Central, &e.Link, &e.DeviceId, &e.EventType, &e.Local, &e.Device, &e.DeviceType, &e.TsUnixMs, &e.InstId)
+		if err != nil {
+			return nil, err
+		}
+		events = append(events, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}

@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
@@ -23,6 +24,7 @@ import (
 type templateData struct {
 	CurrentYear     int
 	IsAuthenticated bool
+	ActiveMenu      string
 	Events          []*models.Event
 	Centrals        []interface{} // Simplified for now
 	SearchType      string
@@ -110,6 +112,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
 	mux.HandleFunc("GET /{$}", app.eventList)
 	mux.HandleFunc("GET /events", app.eventList)
+	mux.HandleFunc("GET /export", app.exportForm)
+	mux.HandleFunc("POST /export", app.exportData)
 
 	return mux
 }
@@ -141,6 +145,7 @@ func (app *application) eventList(w http.ResponseWriter, r *http.Request) {
 	data := templateData{
 		CurrentYear:     time.Now().Year(),
 		IsAuthenticated: true,
+		ActiveMenu:      "events",
 		Events:          events,
 		SearchType:      eventType,
 		SearchCentral:   centralID,
@@ -153,6 +158,93 @@ func (app *application) eventList(w http.ResponseWriter, r *http.Request) {
 	data.HasPrevPage = data.CurrentPage > 1
 
 	app.render(w, http.StatusOK, "events.html", data)
+}
+
+func (app *application) exportForm(w http.ResponseWriter, r *http.Request) {
+	data := templateData{
+		CurrentYear:     time.Now().Year(),
+		IsAuthenticated: true,
+		ActiveMenu:      "export",
+	}
+	app.render(w, http.StatusOK, "export.html", data)
+}
+
+func (app *application) exportData(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	instID := r.PostForm.Get("inst_id")
+	startDateStr := r.PostForm.Get("start_date")
+	endDateStr := r.PostForm.Get("end_date")
+	filename := r.PostForm.Get("filename")
+
+	if filename == "" {
+		filename = "antena.xls"
+	}
+
+	// Basic check for extension
+	if !strings.HasSuffix(filename, ".xls") && !strings.HasSuffix(filename, ".xlsx") {
+		filename += ".xls"
+	}
+
+	var startMs, endMs int64
+
+	// Default: Today to 5 days ago
+	now := time.Now()
+	if startDateStr == "" {
+		// Use local midnight for consistent date filtering
+		midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		startMs = midnight.AddDate(0, 0, -5).UnixMilli()
+	} else {
+		t, _ := time.Parse("2006-01-02", startDateStr)
+		startMs = t.UnixMilli()
+	}
+
+	if endDateStr == "" {
+		endMs = now.UnixMilli()
+	} else {
+		t, _ := time.Parse("2006-01-02", endDateStr)
+		// Set to end of day
+		endMs = t.Add(23*time.Hour + 59*time.Minute + 59*time.Second).UnixMilli()
+	}
+
+	events, err := app.events.GetForExport(instID, startMs, endMs)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("Export: instID='%s', startMs=%d, endMs=%d, found=%d events", instID, startMs, endMs, len(events))
+
+	// Set headers for Excel download
+	w.Header().Set("Content-Type", "application/vnd.ms-excel")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+
+	// CSV content with semicolon separator (Excel friendly in many locales)
+	// Add UTF-8 BOM for Excel to recognize encoding
+	w.Write([]byte{0xEF, 0xBB, 0xBF})
+
+	fmt.Fprintf(w, "Instalacao;Local;Data/Hora;Central;Laco;Dispositivo ID;Dispositivo;Tipo;Evento\n")
+
+	for _, e := range events {
+		t := time.UnixMilli(e.TsUnixMs)
+		dateStr := t.Format("02/01/2006 15:04:05")
+
+		fmt.Fprintf(w, "%s;%s;%s;%d;%d;%d;%s;%s;%s\n",
+			e.InstId,
+			e.Local,
+			dateStr,
+			e.Central,
+			e.Link,
+			e.DeviceId,
+			e.Device,
+			e.DeviceType,
+			e.EventType,
+		)
+	}
 }
 
 func (app *application) render(w http.ResponseWriter, status int, page string, data templateData) {
