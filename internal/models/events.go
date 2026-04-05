@@ -15,6 +15,7 @@ type Event struct {
 	DeviceType string
 	TsUnixMs   int64
 	InstId     string
+	TypeId     string
 }
 
 type EventModel struct {
@@ -25,7 +26,7 @@ func (m *EventModel) All(page, pageSize int, eventType string, centralID int, in
 	offset := (page - 1) * pageSize
 
 	query := `
-		SELECT id, central, link, device_id, event_type, local, device, device_type, ts_unix_ms, inst_id 
+		SELECT id, central, link, device_id, event_type, local, device, device_type, ts_unix_ms, inst_id, type_id 
 		FROM event 
 		WHERE (? = '' OR event_type LIKE ?)
 		AND (? = 0 OR central = ?)
@@ -46,7 +47,7 @@ func (m *EventModel) All(page, pageSize int, eventType string, centralID int, in
 	var events []*Event
 	for rows.Next() {
 		e := &Event{}
-		err := rows.Scan(&e.ID, &e.Central, &e.Link, &e.DeviceId, &e.EventType, &e.Local, &e.Device, &e.DeviceType, &e.TsUnixMs, &e.InstId)
+		err := rows.Scan(&e.ID, &e.Central, &e.Link, &e.DeviceId, &e.EventType, &e.Local, &e.Device, &e.DeviceType, &e.TsUnixMs, &e.InstId, &e.TypeId)
 		if err != nil {
 			return nil, err
 		}
