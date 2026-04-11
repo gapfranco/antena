@@ -1,2 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --font-orbitron: "Orbitron", sans-serif;
+}
+
+@font-face {
+    font-family: 'Orbitron';
+    src: url('../fonts/orbitron-bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+

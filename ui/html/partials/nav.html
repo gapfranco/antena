@@ -1,20 +1,14 @@
 {{define "nav"}}
 <div class="flex space-x-4">
     {{if .IsAuthenticated}}
-    <a href="/events" class="sm:w-auto px-2 py-2 text-indigo-500  font-semibold hover:text-indigo-700">
+    <a href="/installations" class="sm:w-auto px-2 py-2 {{if eq .ActiveMenu "installations"}}text-indigo-700{{else}}text-slate-500{{end}} font-semibold hover:text-indigo-700">
+        Instalações
+    </a>
+    <a href="/events" class="sm:w-auto px-2 py-2 {{if eq .ActiveMenu "events"}}text-indigo-700{{else}}text-slate-500{{end}} font-semibold hover:text-indigo-700">
         Eventos
     </a>
-    <a href="/locations" class="sm:w-auto px-2 py-2 text-slate-500  font-semibold hover:text-indigo-700">
-        Locais
-    </a>
-    <a href="/devices" class="sm:w-auto px-2 py-2 text-slate-500  font-semibold hover:text-indigo-700">
-        Dispositivos
-    </a>
-    <a href="/centrals" class="sm:w-auto px-2 py-2 text-slate-500  font-semibold hover:text-indigo-700">
-        Centrais
-    </a>
-    <a href="/user/logout" class="sm:w-auto px-2 py-2 text-red-500 font-semibold hover:text-red-700">
-        Sair
+    <a href="/export" class="sm:w-auto px-2 py-2 {{if eq .ActiveMenu "export"}}text-indigo-700{{else}}text-slate-500{{end}} font-semibold hover:text-indigo-700">
+        Exportar
     </a>
     {{end}}
 </div>

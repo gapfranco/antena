@@ -26,6 +26,7 @@ type templateData struct {
 	IsAuthenticated bool
 	ActiveMenu      string
 	Events          []*models.Event
+	Installations   []*models.Installation
 	Centrals        []interface{} // Simplified for now
 	SearchType      string
 	SearchCentral   int
@@ -110,12 +111,30 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /static/", http.FileServerFS(ui.Files))
-	mux.HandleFunc("GET /{$}", app.eventList)
+	mux.HandleFunc("GET /{$}", app.installationList)
+	mux.HandleFunc("GET /installations", app.installationList)
 	mux.HandleFunc("GET /events", app.eventList)
 	mux.HandleFunc("GET /export", app.exportForm)
 	mux.HandleFunc("POST /export", app.exportData)
 
 	return mux
+}
+
+func (app *application) installationList(w http.ResponseWriter, r *http.Request) {
+	installations, err := app.events.Installations()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := templateData{
+		CurrentYear:     time.Now().Year(),
+		IsAuthenticated: true,
+		ActiveMenu:      "installations",
+		Installations:   installations,
+	}
+
+	app.render(w, http.StatusOK, "installations.html", data)
 }
 
 func (app *application) eventList(w http.ResponseWriter, r *http.Request) {

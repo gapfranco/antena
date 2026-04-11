@@ -16,6 +16,7 @@
             <a href="/"><h1 class="text-xl font-bold text-indigo-600 tracking-tight">Signal <span class="text-slate-400 font-light">Antena</span></h1></a>
             
             <div class="flex items-center gap-4 h-10">
+                <a href="/installations" class="text-sm font-medium transition-colors h-full flex items-center px-1 border-b-2 {{if eq .ActiveMenu "installations"}}text-indigo-600 border-indigo-600{{else}}text-slate-600 border-transparent hover:text-indigo-600{{end}}">Instalações</a>
                 <a href="/events" class="text-sm font-medium transition-colors h-full flex items-center px-1 border-b-2 {{if eq .ActiveMenu "events"}}text-indigo-600 border-indigo-600{{else}}text-slate-600 border-transparent hover:text-indigo-600{{end}}">Eventos</a>
                 <a href="/export" class="text-sm font-medium transition-colors h-full flex items-center px-1 border-b-2 {{if eq .ActiveMenu "export"}}text-indigo-600 border-indigo-600{{else}}text-slate-600 border-transparent hover:text-indigo-600{{end}}">Exportar</a>
             </div>

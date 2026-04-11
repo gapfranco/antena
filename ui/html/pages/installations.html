@@ -1,0 +1,40 @@
+{{define "title"}}Instalações{{end}}
+
+{{define "main"}}
+<div id="installations-grid" 
+     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4"
+     hx-get="/installations" 
+     hx-trigger="every 10s" 
+     hx-select="#installations-grid" 
+     hx-swap="outerHTML">
+    {{range .Installations}}
+    <div class="bg-white border border-slate-200 shadow-sm overflow-hidden hover:border-indigo-100 transition-all duration-300 flex flex-col" style="aspect-ratio: 1 / 1.1;">
+        <div class="p-4 flex-grow flex flex-col items-center justify-center text-center">
+            <div class="text-xs font-semibold text-slate-600 uppercase tracking-[0.2em] mb-2">{{.InstId}}</div>
+            
+            <div class="relative">
+                <!-- Número Monospaçado - Estilo Orbitron (Quadrado) -->
+                <div class="font-orbitron text-7xl font-bold text-slate-700 leading-none select-none tracking-[-0.05em]">
+                    {{.EventCount}}
+                </div>
+            </div>
+            
+            <div class="text-slate-400 mt-4 text-[9px] font-bold uppercase tracking-[0.3em]">Sinais Registrados</div>
+        </div>
+        
+        <div class="p-3 flex justify-center border-t border-slate-50">
+            <a href="/events?inst_id={{.InstId}}" class="text-indigo-600 hover:text-indigo-800 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2 transition-colors">
+                Abrir Painel
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </a>
+        </div>
+    </div>
+    {{else}}
+    <div class="col-span-full text-center py-12">
+        <p class="text-slate-500 text-lg">Nenhuma instalação encontrada.</p>
+    </div>
+    {{end}}
+</div>
+{{end}}

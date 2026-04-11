@@ -18,8 +18,38 @@ type Event struct {
 	TypeId     string
 }
 
+type Installation struct {
+	InstId     string
+	EventCount int
+}
+
 type EventModel struct {
 	DB *sql.DB
+}
+
+func (m *EventModel) Installations() ([]*Installation, error) {
+	query := `
+		SELECT inst_id, COUNT(*) as event_count 
+		FROM event 
+		GROUP BY inst_id 
+		ORDER BY inst_id ASC`
+
+	rows, err := m.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var installations []*Installation
+	for rows.Next() {
+		i := &Installation{}
+		err := rows.Scan(&i.InstId, &i.EventCount)
+		if err != nil {
+			return nil, err
+		}
+		installations = append(installations, i)
+	}
+	return installations, nil
 }
 
 func (m *EventModel) All(page, pageSize int, eventType string, centralID int, instID string, device string) ([]*Event, error) {
