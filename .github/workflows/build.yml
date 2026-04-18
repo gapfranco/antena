@@ -62,9 +62,11 @@ jobs:
 
       - name: Build
         run: |
-          mkdir build 2>nul || exit /b 0
+          $env:PATH = "C:\mingw64\bin;$env:PATH"
+          $env:CGO_ENABLED = "1"
+          New-Item -ItemType Directory -Force -Path build | Out-Null
           go build -ldflags "-H windowsgui" -o build\antena.exe .\cmd\antena
-        shell: cmd
+        shell: pwsh
 
       - uses: actions/upload-artifact@v4
         with:
