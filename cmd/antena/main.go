@@ -74,6 +74,10 @@ func main() {
 		templateCache: templateCache,
 	}
 
+	runDesktop(app, addr)
+}
+
+func runServer(app *application, addr string) {
 	srv := &http.Server{
 		Addr:     addr,
 		Handler:  app.routes(),
@@ -81,8 +85,7 @@ func main() {
 	}
 
 	log.Printf("Starting server on %s", addr)
-	err = srv.ListenAndServe()
-	log.Fatal(err)
+	log.Fatal(srv.ListenAndServe())
 }
 
 func openDB(primaryURL, authToken string) (*sql.DB, error) {
