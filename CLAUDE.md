@@ -9,7 +9,7 @@ make build          # Desktop binary → ./build/antena (includes Tailwind CSS b
 make build-server   # Headless server binary → ./build/antena-server (-tags headless)
 make tailwind-build # Generate minified CSS: ui/input.css → ui/static/css/styles.css
 make tailwind-watch # Watch Tailwind CSS changes (use during development)
-make clean          # Remove ./bin and generated CSS
+make clean          # Remove ./build and generated CSS
 
 # Desktop (requires native OS runner + CGo + WebKit)
 make windows        # → ./build/antena.exe
@@ -58,7 +58,7 @@ The app has two build modes controlled by the `headless` build tag:
 - `internal/models/events.go` — `EventModel` with DB queries: `Installations()`, `All()` (paginated/filtered), `Count()`, `GetForExport()`
 - `config/config.go` — Viper config loader (reads `antena.conf` then env vars)
 - `ui/efs.go` — declares the `embed.FS` for static assets and templates
-- `ui/html/` — Go `html/template` files: `base.html`, `pages/`, `partials/`
+- `ui/html/` — Go `html/template` files: `base.html`, `pages/` (`installations.html`, `events.html`, `export.html`, `nav.html`), `partials/` (`nav.html`)
 
 ### Request flow
 
@@ -74,8 +74,20 @@ The app has two build modes controlled by the `headless` build tag:
 | GET | `/installations` | installations list |
 | GET | `/events` | paginated event list with filters |
 | GET | `/export` | export form |
-| POST | `/export` | Excel/CSV download |
+| POST | `/export` | CSV download (semicolon-separated, UTF-8 BOM, `.xls` extension) |
 | GET | `/static/*` | embedded static assets |
+
+### Data models
+
+`Event` fields: `ID`, `Central`, `Link`, `DeviceId`, `EventType`, `Local`, `Device`, `DeviceType`, `TsUnixMs`, `InstId`, `TypeId`
+
+`Installation` fields: `InstId`, `EventCount`
+
+`templateData` fields: `CurrentYear`, `IsAuthenticated`, `ActiveMenu`, `Events`, `Installations`, `Centrals`, `SearchType`, `SearchCentral`, `SearchInstID`, `SearchDevice`, `CurrentPage`, `TotalPages`, `HasNextPage`, `HasPrevPage`
+
+### Event list filters (query params)
+
+`event_type`, `central_id`, `inst_id`, `device` — all support partial matching (LIKE `%value%`), except `central_id` (exact int match).
 
 ### Template functions
 
